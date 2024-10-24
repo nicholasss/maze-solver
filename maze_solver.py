@@ -53,29 +53,61 @@ class Window():
 
 
 class Cell():
-    def __init__(self):
-        self.has_left_wall: bool
-        self.has_right_wall: bool
-        self.has_top_wall: bool
-        self.has_bottom_wall: bool
-        self._x1: int
+    def __init__(self, window: Window):
+        self.has_left_wall: bool = True
+        self.has_right_wall: bool = True
+        self.has_top_wall: bool = True
+        self.has_bottom_wall: bool = True
+        self._x1: int  # x1, y1 is the top left corner
         self._y1: int
-        self._x2: int
+        self._x2: int  # x2, y2 is the bottom right corner
         self._y2: int
-        self._win: Window
+        self._win: Window = window
+        self._fill_color: str = "black"
 
-    def draw(self):
-        pass
+    def draw(self, top_left_p: Point, bottom_right_p: Point):
+        self._x1 = top_left_p.x
+        self._y1 = top_left_p.y
+        self._x2 = bottom_right_p.x
+        self._y2 = bottom_right_p.y
+
+        if self.has_top_wall:
+            top_left_p: Point = Point(self._x1, self._y1)
+            top_right_p: Point = Point(self._x1, self._y2)
+            self._win.draw(Line(top_left_p, top_right_p),
+                           self._fill_color)
+
+        if self.has_left_wall:
+            top_left_p: Point = Point(self._x1, self._y1)
+            bottom_left_p: Point = Point(self._x2, self._y1)
+            self._win.draw(Line(top_left_p, bottom_left_p),
+                           self._fill_color)
+
+        if self.has_bottom_wall:
+            bottom_left_p: Point = Point(self._x2, self._y1)
+            bottom_right_p: Point = Point(self._x2, self._y2)
+            self._win.draw(Line(bottom_left_p, bottom_right_p),
+                           self._fill_color)
+
+        if self.has_right_wall:
+            bottom_right_p: Point = Point(self._x2, self._y2)
+            top_right_p: Point = Point(self._x1, self._y2)
+            self._win.draw(Line(bottom_right_p, top_right_p),
+                           self._fill_color)
 
 
 def main():
     win = Window(800, 600)
 
-    # line1 = Line(Point(100, 100), Point(300, 300))
-    # win.draw(line=line1, fill_color="black")
+    p1_1 = Point(x=50, y=50)
+    p1_2 = Point(x=100, y=100)
+    cell1 = Cell(win)
+    cell1.draw(p1_1, p1_2)
 
-    # line2 = Line(Point(100, 300), Point(300, 100))
-    # win.draw(line=line2, fill_color="red")
+    p2_1 = Point(x=100, y=50)
+    p2_2 = Point(x=150, y=100)
+    cell2 = Cell(win)
+    cell2.draw(p2_1, p2_2)
 
     win.wait_for_close()
 
