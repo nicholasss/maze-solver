@@ -72,6 +72,7 @@ class Cell():
         self._y2: int
         self._window: Window = window
         self._fill_color: str = "black"
+        self._bg_color: str = "#d9d9d9"
 
     def draw(self, top_left_p: Point, bottom_right_p: Point):
         self._x1 = top_left_p.x
@@ -79,29 +80,37 @@ class Cell():
         self._x2 = bottom_right_p.x
         self._y2 = bottom_right_p.y
 
+        top_wall_color: str = self._bg_color
         if self.has_top_wall:
-            top_left_p: Point = Point(self._x1, self._y1)
-            top_right_p: Point = Point(self._x2, self._y1)
-            self._window.draw(Line(top_left_p, top_right_p),
-                              self._fill_color)
+            top_wall_color = self._fill_color
+        top_left_p: Point = Point(self._x1, self._y1)
+        top_right_p: Point = Point(self._x2, self._y1)
+        self._window.draw(
+            Line(top_left_p, top_right_p), top_wall_color)
 
+        left_wall_color: str = self._bg_color
         if self.has_left_wall:
-            top_left_p: Point = Point(self._x1, self._y1)
-            bottom_left_p: Point = Point(self._x1, self._y2)
-            self._window.draw(Line(top_left_p, bottom_left_p),
-                              self._fill_color)
+            left_wall_color = self._fill_color
+        top_left_p: Point = Point(self._x1, self._y1)
+        bottom_left_p: Point = Point(self._x1, self._y2)
+        self._window.draw(
+            Line(top_left_p, bottom_left_p), left_wall_color)
 
+        bottom_wall_color: str = self._bg_color
         if self.has_bottom_wall:
-            bottom_left_p: Point = Point(self._x1, self._y2)
-            bottom_right_p: Point = Point(self._x2, self._y2)
-            self._window.draw(Line(bottom_left_p, bottom_right_p),
-                              self._fill_color)
+            bottom_wall_color = self._fill_color
+        bottom_left_p: Point = Point(self._x1, self._y2)
+        bottom_right_p: Point = Point(self._x2, self._y2)
+        self._window.draw(
+            Line(bottom_left_p, bottom_right_p), bottom_wall_color)
 
+        right_wall_color: str = self._bg_color
         if self.has_right_wall:
-            bottom_right_p: Point = Point(self._x2, self._y2)
-            top_right_p: Point = Point(self._x2, self._y1)
-            self._window.draw(Line(bottom_right_p, top_right_p),
-                              self._fill_color)
+            right_wall_color = self._fill_color
+        bottom_right_p: Point = Point(self._x2, self._y2)
+        top_right_p: Point = Point(self._x2, self._y1)
+        self._window.draw(
+            Line(bottom_right_p, top_right_p), right_wall_color)
 
     def draw_move(self, to_cell: Self, undo=False):
         path_fill_color: str = "gray"
@@ -161,12 +170,29 @@ class Maze():
         self._window.redraw()
         time.sleep(0.05)
 
+    def _break_entrance_and_exit(self):
+        if self._cells == []:
+            print("cells not created yet")
+            return None
+
+        first_cell: Cell = self._cells[0][0]
+        i_index = self._num_columns - 1
+        j_index = self._num_rows - 1
+        last_cell: Cell = self._cells[i_index][j_index]
+
+        first_cell.has_top_wall = False
+        self._draw_cell(0, 0)
+        last_cell.has_right_wall = False
+        self._draw_cell(i_index, j_index)
+
 
 def main():
     window = Window(800, 600)
 
     maze = Maze(50, 50, num_rows=4, num_columns=8,
                 cell_width=50, cell_height=50, window=window)
+
+    maze._break_entrance_and_exit()
 
     window.wait_for_close()
 
