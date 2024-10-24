@@ -30,6 +30,26 @@ class Window():
         print("DEBUG: closing program")
 
 
+class Point():
+    def __init__(self, x, y):
+        self.x = x  # horizontal, 0 is left side
+        self.y = y  # vertical, 0 is the top side
+
+
+class Line():
+    def __init__(self, point_a, point_b):
+        self.p_a = point_a
+        self.p_b = point_b
+
+    def draw(self, canvas: Canvas, fill_color: str):
+        x1 = self.p_a.x
+        y1 = self.p_a.y
+        x2 = self.p_b.x
+        y2 = self.p_b.y
+
+        canvas.create_line(x1, y1, x2, y2, fill=fill_color, width=2)
+
+
 def main():
     win = Window(800, 600)
     win.wait_for_close()
