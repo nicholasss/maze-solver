@@ -29,6 +29,9 @@ class Window():
         self.window_running = False
         print("DEBUG: closing program")
 
+    def draw(self, line, fill_color: str):
+        line.draw(canvas=self.canvas, fill_color=fill_color)
+
 
 class Point():
     def __init__(self, x, y):
@@ -52,6 +55,10 @@ class Line():
 
 def main():
     win = Window(800, 600)
+
+    line = Line(Point(100, 100), Point(300, 300))
+    win.draw(line=line, fill_color="black")
+
     win.wait_for_close()
 
 
