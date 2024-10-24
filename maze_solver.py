@@ -33,7 +33,7 @@ class Window():
 
         self._root.protocol("WM_DELETE_WINDOW", self.close)
         self._root.title("Maze Solver")
-        self._canvas.pack()
+        self._canvas.pack(fill=BOTH, expand=True)
 
     def redraw(self):
         self._root.update_idletasks()
