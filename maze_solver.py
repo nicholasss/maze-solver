@@ -2,6 +2,7 @@
 
 from tkinter import Tk, BOTH, Canvas
 from typing import Self
+import time
 
 
 class Point():
@@ -115,7 +116,6 @@ class Cell():
             y=((to_cell._y1 + to_cell._y2) / 2))
         path: Line = Line(center_self, center_next)
 
-        print("drawing path")
         self._win.draw(path, path_fill_color, 5)
 
 
@@ -129,23 +129,46 @@ class Maze():
         self._num_columns: int = num_columns
         self._cell_width: int = cell_width
         self._cell_height: int = cell_height
+        self._window: Window = window
 
         self._create_cells()
 
     def _create_cells(self):
-        pass
+        # filling cells into the matrix
+        for i in range(self._num_columns):
+            self._cells.append([])
+            for j in range(self._num_rows):
+                self._cells[i].append(Cell(self._window))
 
-    def _draw_cell(self, i, j):
-        pass
+        # drawing each cell in the matrix
+        for i in range(self._num_columns):
+            for j in range(self._num_rows):
+                self._draw_cell(i, j)
+
+    def _draw_cell(self, i: int, j: int):
+        # calculate x, y position of cells and draw cell, then call _animate
+        top_left_p: Point = Point(x=self._x1 + (i * self._cell_width),
+                                  y=self._y1 + (j * self._cell_height))
+        bottom_right_p: Point = Point(x=top_left_p.x + self._cell_width,
+                                      y=top_left_p.y + self._cell_height)
+
+        cell: Cell = self._cells[i][j]
+        cell.draw(top_left_p, bottom_right_p)
+
+        self._animate()
 
     def _animate(self):
-        pass
+        self._window.redraw()
+        time.sleep(0.05)
 
 
 def main():
-    win = Window(800, 600)
+    window = Window(800, 600)
 
-    win.wait_for_close()
+    maze = Maze(50, 50, num_rows=4, num_columns=8,
+                cell_width=50, cell_height=50, window=window)
+
+    window.wait_for_close()
 
 
 if __name__ == "__main__":
