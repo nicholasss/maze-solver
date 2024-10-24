@@ -3,8 +3,28 @@
 from tkinter import Tk, BOTH, Canvas
 
 
+class Point():
+    def __init__(self, x: int, y: int):
+        self.x: int = x  # horizontal, 0 is left side
+        self.y: int = y  # vertical, 0 is the top side
+
+
+class Line():
+    def __init__(self, point_a: Point, point_b: Point):
+        self._p_a: Point = point_a
+        self._p_b: Point = point_b
+
+    def draw(self, canvas: Canvas, fill_color: str):
+        x1 = self._p_a.x
+        y1 = self._p_a.y
+        x2 = self._p_b.x
+        y2 = self._p_b.y
+
+        canvas.create_line(x1, y1, x2, y2, fill=fill_color, width=2)
+
+
 class Window():
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int):
         self._width: int = width
         self._height: int = height
         self._root: Tk = Tk()
@@ -28,28 +48,8 @@ class Window():
         self._window_running = False
         print("Window was closed.")
 
-    def draw(self, line, fill_color: str):
+    def draw(self, line: Line, fill_color: str):
         line.draw(canvas=self._canvas, fill_color=fill_color)
-
-
-class Point():
-    def __init__(self, x, y):
-        self.x: int = x  # horizontal, 0 is left side
-        self.y: int = y  # vertical, 0 is the top side
-
-
-class Line():
-    def __init__(self, point_a, point_b):
-        self._p_a: Point = point_a
-        self._p_b: Point = point_b
-
-    def draw(self, canvas: Canvas, fill_color: str):
-        x1 = self._p_a.x
-        y1 = self._p_a.y
-        x2 = self._p_b.x
-        y2 = self._p_b.y
-
-        canvas.create_line(x1, y1, x2, y2, fill=fill_color, width=2)
 
 
 class Cell():
