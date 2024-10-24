@@ -69,7 +69,7 @@ class Cell():
         self._y1: int
         self._x2: int  # x2, y2 is the bottom right corner
         self._y2: int
-        self._win: Window = window
+        self._window: Window = window
         self._fill_color: str = "black"
 
     def draw(self, top_left_p: Point, bottom_right_p: Point):
@@ -81,26 +81,26 @@ class Cell():
         if self.has_top_wall:
             top_left_p: Point = Point(self._x1, self._y1)
             top_right_p: Point = Point(self._x2, self._y1)
-            self._win.draw(Line(top_left_p, top_right_p),
-                           self._fill_color)
+            self._window.draw(Line(top_left_p, top_right_p),
+                              self._fill_color)
 
         if self.has_left_wall:
             top_left_p: Point = Point(self._x1, self._y1)
             bottom_left_p: Point = Point(self._x1, self._y2)
-            self._win.draw(Line(top_left_p, bottom_left_p),
-                           self._fill_color)
+            self._window.draw(Line(top_left_p, bottom_left_p),
+                              self._fill_color)
 
         if self.has_bottom_wall:
             bottom_left_p: Point = Point(self._x1, self._y2)
             bottom_right_p: Point = Point(self._x2, self._y2)
-            self._win.draw(Line(bottom_left_p, bottom_right_p),
-                           self._fill_color)
+            self._window.draw(Line(bottom_left_p, bottom_right_p),
+                              self._fill_color)
 
         if self.has_right_wall:
             bottom_right_p: Point = Point(self._x2, self._y2)
             top_right_p: Point = Point(self._x2, self._y1)
-            self._win.draw(Line(bottom_right_p, top_right_p),
-                           self._fill_color)
+            self._window.draw(Line(bottom_right_p, top_right_p),
+                              self._fill_color)
 
     def draw_move(self, to_cell: Self, undo=False):
         path_fill_color: str = "gray"
@@ -119,22 +119,31 @@ class Cell():
         self._win.draw(path, path_fill_color, 5)
 
 
+class Maze():
+    def __init__(self, x1: int, y1: int, num_rows: int, num_columns: int,
+                 cell_width: int, cell_height: int, window: Window):
+        self._cells: list = []
+        self._x1: int = x1
+        self._y1: int = y1
+        self._num_rows: int = num_rows
+        self._num_columns: int = num_columns
+        self._cell_width: int = cell_width
+        self._cell_height: int = cell_height
+
+        self._create_cells()
+
+    def _create_cells(self):
+        pass
+
+    def _draw_cell(self, i, j):
+        pass
+
+    def _animate(self):
+        pass
+
+
 def main():
     win = Window(800, 600)
-
-    p1_1 = Point(x=50, y=50)
-    p1_2 = Point(x=100, y=100)
-    cell1 = Cell(win)
-    cell1.has_right_wall = False
-    cell1.draw(p1_1, p1_2)
-
-    p2_1 = Point(x=100, y=50)
-    p2_2 = Point(x=150, y=100)
-    cell2 = Cell(win)
-    cell2.has_left_wall = False
-    cell2.draw(p2_1, p2_2)
-
-    cell1.draw_move(to_cell=cell2)
 
     win.wait_for_close()
 
