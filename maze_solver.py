@@ -3,6 +3,7 @@
 from tkinter import Tk, BOTH, Canvas
 from typing import Self
 import time
+import random
 
 
 class Point():
@@ -73,6 +74,7 @@ class Cell():
         self._window: Window = window
         self._fill_color: str = "black"
         self._bg_color: str = "#d9d9d9"
+        self.visited: bool = False
 
     def draw(self, top_left_p: Point, bottom_right_p: Point):
         self._x1 = top_left_p.x
@@ -130,7 +132,8 @@ class Cell():
 
 class Maze():
     def __init__(self, x1: int, y1: int, num_rows: int, num_columns: int,
-                 cell_width: int, cell_height: int, window: Window):
+                 cell_width: int, cell_height: int, window: Window,
+                 seed: int = None):
         self._cells: list = []
         self._x1: int = x1
         self._y1: int = y1
@@ -139,6 +142,9 @@ class Maze():
         self._cell_width: int = cell_width
         self._cell_height: int = cell_height
         self._window: Window = window
+
+        if seed is not None:
+            self.seed = random.seed(seed)
 
         self._create_cells()
 
@@ -170,6 +176,17 @@ class Maze():
         self._window.redraw()
         time.sleep(0.05)
 
+    def _break_cell_wall(self, i: int, j: int, side: str):
+        current_cell: Cell = self._cells[i][j]
+        if side == "top":
+            current_cell.has_top_wall = False
+        elif side == "left":
+            current_cell.has_left_wall = False
+        elif side == "right":
+            current_cell.has_right_wall = False
+        else:  # side == "bottom"
+            current_cell.has_bottom_wall = False
+
     def _break_entrance_and_exit(self):
         if self._cells == []:
             print("cells not created yet")
@@ -185,14 +202,99 @@ class Maze():
         last_cell.has_right_wall = False
         self._draw_cell(i_index, j_index)
 
+    def _break_walls_r(self, i: int, j: int):
+        self._cells[i][j].visited = True
+
+        columns_max_index: int = self._num_columns - 1
+        rows_max_index: int = self._num_rows - 1
+
+        current_column: int = i
+        current_row: int = j
+
+        while True:
+            # calculating neighbors
+            neighbors: list = []
+            if current_row <= 0:
+                # top-most row, no top neighbor
+                top_neighbor = None
+            else:
+                top_neighbor = [i, j - 1]
+
+            if current_column <= 0:
+                # left-most column, no left neighbor
+                left_neighbor = None
+            else:
+                left_neighbor = [i - 1, j]
+
+            if current_row >= rows_max_index:
+                # bottom-most row, no bottom neighbor
+                bottom_neighbor = None
+            else:
+                bottom_neighbor = [i, j + 1]
+
+            if current_column >= columns_max_index:
+                # right-most column, no right neighbor
+                right_neighbor = None
+            else:
+                right_neighbor = [i + 1, j]
+
+            neighbors = [top_neighbor, left_neighbor,
+                         bottom_neighbor, right_neighbor]
+
+            neighbors = list(filter(lambda x: x is not None, neighbors))
+            neighbors = list(filter(lambda x:
+                                    self._cells[x[0]][x[1]
+                                                      ].visited is not True,
+                                    neighbors)
+                             )
+
+            if neighbors == []:
+                self._draw_cell(current_column, current_row)
+                return
+
+            # pickng a random direction
+            random_neighbor = random.choice(neighbors)
+            neighbors.remove(random_neighbor)
+
+            if random_neighbor == top_neighbor:
+                self._break_cell_wall(i, j, "top")
+                self._break_cell_wall(
+                    random_neighbor[0], random_neighbor[1], "bottom")
+                self._break_walls_r(random_neighbor[0], random_neighbor[1])
+            elif random_neighbor == left_neighbor:
+                self._break_cell_wall(i, j, "left")
+                self._break_cell_wall(
+                    random_neighbor[0], random_neighbor[1], "right")
+                self._break_walls_r(random_neighbor[0], random_neighbor[1])
+            elif random_neighbor == bottom_neighbor:
+                self._break_cell_wall(i, j, "bottom")
+                self._break_cell_wall(
+                    random_neighbor[0], random_neighbor[1], "top")
+                self._break_walls_r(random_neighbor[0], random_neighbor[1])
+            else:  # choice == right_neighbor
+                self._break_cell_wall(i, j, "right")
+                self._break_cell_wall(
+                    random_neighbor[0], random_neighbor[1], "left")
+                self._break_walls_r(random_neighbor[0], random_neighbor[1])
+
+    def _reset_cells_visited(self):
+        for i in range(self._num_columns):
+            for j in range(self._num_rows):
+                self._cells[i][j].visited = False
+
 
 def main():
     window = Window(800, 600)
 
-    maze = Maze(50, 50, num_rows=4, num_columns=8,
-                cell_width=50, cell_height=50, window=window)
+    # TODO: After debugging, remove the seed argument to ensure randomness
+
+    maze = Maze(50, 50, num_rows=10, num_columns=14,
+                cell_width=50, cell_height=50, window=window, seed=420)
 
     maze._break_entrance_and_exit()
+
+    maze._break_walls_r(0, 0)
+    maze._reset_cells_visited()
 
     window.wait_for_close()
 
