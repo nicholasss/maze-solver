@@ -62,6 +62,18 @@ class Tests(unittest.TestCase):
 
         win3.close()
 
+    def test_reset_visited(self):
+        win4 = Window(800, 600)
+
+        m4 = Maze(0, 0, 10, 10, 5, 5, win4)
+        m4._break_entrance_and_exit()
+        m4._break_walls_r(0, 0)
+        m4._reset_cells_visited()
+
+        self.assertEqual(m4._cells[0][0].visited, False)
+
+        win4.close()
+
 
 if __name__ == "__main__":
     unittest.main()
