@@ -65,7 +65,7 @@ class Window():
         self._window_running = False
         print("Window was closed.")
 
-    def draw(self, line: Line, fill_color: str, width: int = 2):
+    def draw(self, line: Line, fill_color: str, width: int = 1):
         line.draw(canvas=self._canvas, fill_color=fill_color, width=width)
 
 
@@ -182,7 +182,7 @@ class Maze():
 
     def _animate(self):
         self._window.redraw()
-        time.sleep(0.05)
+        time.sleep(0.015)
 
     def _break_cell_wall(self, i: int, j: int, side: str):
         current_cell: Cell = self._cells[i][j]
@@ -377,8 +377,8 @@ def main():
 
     # TODO: After debugging, remove the seed argument to ensure randomness
 
-    maze = Maze(50, 50, num_rows=10, num_columns=14,
-                cell_width=50, cell_height=50, window=window)
+    maze = Maze(50, 50, num_rows=20, num_columns=28,
+                cell_width=25, cell_height=25, window=window)
 
     maze._break_entrance_and_exit()
 
