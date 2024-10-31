@@ -2,8 +2,16 @@
 
 from tkinter import Tk, BOTH, Canvas
 from typing import Self
+from enum import Enum
 import time
 import random
+
+
+class Direction(Enum):
+    Left = 1
+    Right = 2
+    Up = 3
+    Down = 4
 
 
 class Point():
@@ -115,9 +123,9 @@ class Cell():
             Line(bottom_right_p, top_right_p), right_wall_color)
 
     def draw_move(self, to_cell: Self, undo=False):
-        path_fill_color: str = "gray"
+        path_fill_color: str = "green"
         if undo:
-            path_fill_color = "red"
+            path_fill_color = "grey"
 
         center_self: Point = Point(
             x=((self._x1 + self._x2) / 2),
@@ -127,7 +135,7 @@ class Cell():
             y=((to_cell._y1 + to_cell._y2) / 2))
         path: Line = Line(center_self, center_next)
 
-        self._win.draw(path, path_fill_color, 5)
+        self._window.draw(path, path_fill_color, 5)
 
 
 class Maze():
@@ -189,7 +197,7 @@ class Maze():
 
     def _break_entrance_and_exit(self):
         if self._cells == []:
-            print("cells not created yet")
+            # print("cells not created yet")
             return None
 
         first_cell: Cell = self._cells[0][0]
@@ -201,6 +209,71 @@ class Maze():
         self._draw_cell(0, 0)
         last_cell.has_right_wall = False
         self._draw_cell(i_index, j_index)
+
+    def _direction_from_cell(self, origin: list[int],
+                             destination: list[int]) -> Direction:
+        origin_i: int = origin[0]
+        origin_j: int = origin[1]
+        destination_i: int = destination[0]
+        destination_j: int = destination[1]
+
+        if destination_j == origin_j - 1 and destination_i == origin_i:
+            return Direction.Up
+
+        elif destination_j == origin_j + 1 and destination_i == origin_i:
+            return Direction.Down
+
+        elif destination_i == origin_i - 1 and destination_j == origin_j:
+            return Direction.Left
+
+        else:  # destination_i == origin_i + 1 and destination_j == origin_j:
+            return Direction.Right
+
+        # NOTE: no direction found past this point
+        return None
+
+    def _find_valid_neighbors(self, i: int, j: int) -> list:
+        columns_max_index: int = self._num_columns - 1
+        rows_max_index: int = self._num_rows - 1
+
+        current_column: int = i
+        current_row: int = j
+
+        neighbors: list = []
+
+        if current_row <= 0:
+            # top-most row, no top neighbor
+            top_neighbor = None
+        else:
+            top_neighbor = [i, j - 1]
+
+        if current_column <= 0:
+            # left-most column, no left neighbor
+            left_neighbor = None
+        else:
+            left_neighbor = [i - 1, j]
+
+        if current_row >= rows_max_index:
+            # bottom-most row, no bottom neighbor
+            bottom_neighbor = None
+        else:
+            bottom_neighbor = [i, j + 1]
+
+        if current_column >= columns_max_index:
+            # right-most column, no right neighbor
+            right_neighbor = None
+        else:
+            right_neighbor = [i + 1, j]
+
+        neighbors = [top_neighbor, left_neighbor,
+                     bottom_neighbor, right_neighbor]
+
+        neighbors = list(filter(lambda x: x is not None, neighbors))
+        neighbors = list(filter(lambda x:
+                                self._cells[x[0]][x[1]].visited is not True,
+                                neighbors)
+                         )
+        return neighbors
 
     def _break_walls_r(self, i: int, j: int):
         self._cells[i][j].visited = True
@@ -282,6 +355,56 @@ class Maze():
             for j in range(self._num_rows):
                 self._cells[i][j].visited = False
 
+    def solve(self):
+        print("solving maze")
+        i: int = 0
+        j: int = 0
+        solved: bool = self._solve_r(i, j)
+        if solved:
+            return True
+        else:
+            return False
+
+    def _solve_r(self, i: int, j: int):
+        self._animate()
+        current_cell: Cell = self._cells[i][j]
+        current_cell_coord: list[int] = [i, j]
+        current_cell.visited = True
+        goal_i: int = self._num_columns - 1
+        goal_j: int = self._num_rows - 1
+
+        if i == goal_i and j == goal_j:
+            return True
+
+        valid_neighbors: list = self._find_valid_neighbors(i, j)
+
+        for neighbor in valid_neighbors:
+
+            neighbor_direction: Direction = self._direction_from_cell(
+                origin=current_cell_coord, destination=neighbor)
+
+            dir_blocked: bool = True
+            if neighbor_direction is Direction.Up:
+                dir_blocked = current_cell.has_top_wall
+            elif neighbor_direction is Direction.Left:
+                dir_blocked = current_cell.has_left_wall
+            elif neighbor_direction is Direction.Down:
+                dir_blocked = current_cell.has_bottom_wall
+            else:  # right wall
+                dir_blocked = current_cell.has_right_wall
+
+            neighbor_cell = self._cells[neighbor[0]][neighbor[1]]
+            if dir_blocked:
+                continue
+
+            current_cell.draw_move(neighbor_cell, undo=False)
+
+            is_solved: bool = self._solve_r(neighbor[0], neighbor[1])
+            if is_solved:
+                return True
+            else:
+                current_cell.draw_move(neighbor_cell, undo=True)
+
 
 def main():
     window = Window(800, 600)
@@ -289,12 +412,16 @@ def main():
     # TODO: After debugging, remove the seed argument to ensure randomness
 
     maze = Maze(50, 50, num_rows=10, num_columns=14,
-                cell_width=50, cell_height=50, window=window, seed=420)
+                cell_width=50, cell_height=50, window=window)
 
     maze._break_entrance_and_exit()
 
     maze._break_walls_r(0, 0)
     maze._reset_cells_visited()
+
+    is_solved: bool = maze.solve()
+    if is_solved:
+        print("maze was solved")
 
     window.wait_for_close()
 
