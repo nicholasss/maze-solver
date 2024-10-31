@@ -277,74 +277,40 @@ class Maze():
 
     def _break_walls_r(self, i: int, j: int):
         self._cells[i][j].visited = True
-
-        columns_max_index: int = self._num_columns - 1
-        rows_max_index: int = self._num_rows - 1
-
         current_column: int = i
         current_row: int = j
 
         while True:
             # calculating neighbors
-            neighbors: list = []
-            if current_row <= 0:
-                # top-most row, no top neighbor
-                top_neighbor = None
-            else:
-                top_neighbor = [i, j - 1]
+            valid_neighbors: list = self._find_valid_neighbors(i, j)
 
-            if current_column <= 0:
-                # left-most column, no left neighbor
-                left_neighbor = None
-            else:
-                left_neighbor = [i - 1, j]
-
-            if current_row >= rows_max_index:
-                # bottom-most row, no bottom neighbor
-                bottom_neighbor = None
-            else:
-                bottom_neighbor = [i, j + 1]
-
-            if current_column >= columns_max_index:
-                # right-most column, no right neighbor
-                right_neighbor = None
-            else:
-                right_neighbor = [i + 1, j]
-
-            neighbors = [top_neighbor, left_neighbor,
-                         bottom_neighbor, right_neighbor]
-
-            neighbors = list(filter(lambda x: x is not None, neighbors))
-            neighbors = list(filter(lambda x:
-                                    self._cells[x[0]][x[1]
-                                                      ].visited is not True,
-                                    neighbors)
-                             )
-
-            if neighbors == []:
+            if valid_neighbors == []:
                 self._draw_cell(current_column, current_row)
                 return
 
             # pickng a random direction
-            random_neighbor = random.choice(neighbors)
-            neighbors.remove(random_neighbor)
+            random_neighbor = random.choice(valid_neighbors)
+            valid_neighbors.remove(random_neighbor)
+            neighbor_direction: Direction = self._direction_from_cell(
+                origin=[i, j],
+                destination=[random_neighbor[0], random_neighbor[1]])
 
-            if random_neighbor == top_neighbor:
+            if neighbor_direction == Direction.Up:
                 self._break_cell_wall(i, j, "top")
                 self._break_cell_wall(
                     random_neighbor[0], random_neighbor[1], "bottom")
                 self._break_walls_r(random_neighbor[0], random_neighbor[1])
-            elif random_neighbor == left_neighbor:
+            elif neighbor_direction == Direction.Left:
                 self._break_cell_wall(i, j, "left")
                 self._break_cell_wall(
                     random_neighbor[0], random_neighbor[1], "right")
                 self._break_walls_r(random_neighbor[0], random_neighbor[1])
-            elif random_neighbor == bottom_neighbor:
+            elif neighbor_direction == Direction.Down:
                 self._break_cell_wall(i, j, "bottom")
                 self._break_cell_wall(
                     random_neighbor[0], random_neighbor[1], "top")
                 self._break_walls_r(random_neighbor[0], random_neighbor[1])
-            else:  # choice == right_neighbor
+            else:  # neighbor_direction == Direction.Right
                 self._break_cell_wall(i, j, "right")
                 self._break_cell_wall(
                     random_neighbor[0], random_neighbor[1], "left")
