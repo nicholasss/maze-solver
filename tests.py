@@ -1,10 +1,31 @@
 #!/usr/bin/python3
 
 import unittest
-from maze_solver import Maze, Window
+from maze_solver import Maze, Window, Direction
 
 
 class Tests(unittest.TestCase):
+    def test_direction_from_cell(self):
+        origin_1 = [1, 1]
+        dest_1 = [1, 0]
+        self.assertEqual(Maze._direction_from_cell(
+            origin_1, dest_1), Direction.Up)
+
+        origin_2 = [1, 1]
+        dest_2 = [1, 2]
+        self.assertEqual(Maze._direction_from_cell(
+            origin_2, dest_2), Direction.Down)
+
+        origin_3 = [1, 1]
+        dest_3 = [0, 1]
+        self.assertEqual(Maze._direction_from_cell(
+            origin_3, dest_3), Direction.Left)
+
+        origin_4 = [1, 1]
+        dest_4 = [2, 1]
+        self.assertEqual(Maze._direction_from_cell(
+            origin_4, dest_4), Direction.Right)
+
     def test_maze_create_calls(self):
         win1 = Window(800, 600)
 
